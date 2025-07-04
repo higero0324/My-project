@@ -1,0 +1,27 @@
+[Libraries]
+[Libraries]/
+[Libraries]/**/*
+[Libraries]/**/.*
+[Libraries]/**/.*/**
+
+# Unity
+[Libraries]
+Temp/
+Obj/
+Build/
+Builds/
+Library/
+Logs/
+MemoryCaptures/
+*.csproj
+*.unityproj
+*.sln
+*.user
+*.pidb
+*.booproj
+*.svd
+*.suo
+*.apk
+*.exe
+*.pdb
+*.mdb
