@@ -3,27 +3,24 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class BallController : MonoBehaviour
 {
-    public float baseSpeed = 5f;
-    public float timeSpeedGain = 0.05f;
-    public float hitSpeedGain = 0.2f;
-    public float maxSpeed = 20f;
+    public float baseSpeed = 15f;
+    public float currentSpeed; // 外部参照用（PlayerControllerなどから使う）
 
-    public float currentSpeed { get; private set; }
+    public int hitCount = 0; // 衝突回数をカウント
 
+    public float hitWeight = 0.2f;
     private Vector2 moveDirection;
-    private float startTime;
-    private int hitCount = 0;
     private Rigidbody2D rb;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = 0f;
+        rb.linearDamping = 0f;
+        rb.angularDamping = 0f;
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
-        startTime = Time.time;
-
-        // ランダムに左右スタート
+        // ランダムに左右へ発射
         int dir = Random.Range(0, 2) * 2 - 1;
         moveDirection = new Vector2(dir, 0).normalized;
 
@@ -33,61 +30,47 @@ public class BallController : MonoBehaviour
 
     void FixedUpdate()
     {
-        currentSpeed = Mathf.Min(
-            baseSpeed + (Time.time - startTime) * timeSpeedGain + hitCount * hitSpeedGain,
-            maxSpeed
-        );
-        rb.linearVelocity = moveDirection * currentSpeed;
-    }
-
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        Vector2 normal;
-
-        if (other.CompareTag("WallTop"))
+        if (currentSpeed + hitWeight <= 25f) // 最大速度制限
         {
-            normal = Vector2.down;
-        }
-        else if (other.CompareTag("WallBottom"))
-        {
-            normal = Vector2.up;
-        }
-        else if (other.CompareTag("WallLeft"))
-        {
-            normal = Vector2.right;
-        }
-        else if (other.CompareTag("WallRight"))
-        {
-            normal = Vector2.left;
+            currentSpeed = baseSpeed + hitCount * hitWeight; // 衝突回数に応じて速度を調整
+            // 等速直線運動（速度補正）
         }
         else
         {
-            // プレイヤーなどとの衝突 → 近似的な法線
-            normal = (transform.position - other.transform.position).normalized;
-            hitCount++;
+            currentSpeed = 25f; // 最大速度を超えないように制限
         }
-
-        if (other.CompareTag("CastleR"))
-        {
-            CastleController castle = other.GetComponent<CastleController>();
-            if (castle != null)
-            {
-                castle.TakeDamage(1);
-                Debug.Log("左の城にダメージ！");
-            }
-        }
-        else if (other.CompareTag("CastleB"))
-        {
-            CastleController castle = other.GetComponent<CastleController>();
-            if (castle != null)
-            {
-                castle.TakeDamage(1);
-                Debug.Log("右の城にダメージ！");
-            }
-        }
-
-        // 反射方向を更新（そのまま速度にも反映される）
-        moveDirection = Vector2.Reflect(moveDirection, normal).normalized;
+        
         rb.linearVelocity = moveDirection * currentSpeed;
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        // 衝突から法線を取得し、反射方向を決定
+        if (collision.contacts.Length > 0 &&collision.collider.CompareTag("Player"))
+            {
+                Vector2 toPlayer = ((Vector2)collision.collider.transform.position - rb.position).normalized;
+                // ✅ その逆方向に飛ばす（はじく）
+                moveDirection = (-toPlayer).normalized;
+                // ✅ 等速で移動開始
+                rb.linearVelocity = moveDirection * currentSpeed;
+                hitCount++;
+            }
+        else if (collision.contacts.Length > 0)
+            {
+                Vector2 normal = collision.contacts[0].normal;
+                moveDirection = Vector2.Reflect(moveDirection, normal).normalized;
+                rb.linearVelocity = moveDirection * currentSpeed;
+            }
+
+        // 城に当たったときの処理
+        if (collision.collider.CompareTag("CastleR") || collision.collider.CompareTag("CastleB"))
+        {
+            CastleController castle = collision.collider.GetComponent<CastleController>();
+            if (castle != null)
+            {
+                castle.TakeDamage(1);
+                Debug.Log((collision.collider.CompareTag("CastleR") ? "左" : "右") + "の城にダメージ！");
+            }
+        }
     }
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     public BallController ball;
-    public float baseSpeed = 5f;
+    public float baseSpeed = 10f;
     public float addSpeed = 0.7f;
 
     public string horizontalAxis = "Horizontal";
@@ -41,11 +41,11 @@ public class PlayerController : MonoBehaviour
 
         if (playerSide == Side.Red)
     {
-        pos.x = Mathf.Clamp(pos.x, -11f, -4f);
+        pos.x = Mathf.Clamp(pos.x, -11f, -3f);
     }
     else
     {
-        pos.x = Mathf.Clamp(pos.x, 4f, 11f);
+        pos.x = Mathf.Clamp(pos.x, 3f, 11f);
     }
 
 
