@@ -10,6 +10,8 @@ TagManager:
   - WallRight
   - CastleR
   - CastleB
+  - PlayerR
+  - PlayerB
   layers:
   - Default
   - TransparentFX

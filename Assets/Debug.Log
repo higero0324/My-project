@@ -3,4 +3,5 @@ void Update()
     float h = Input.GetAxisRaw(horizontalAxis);
     float v = Input.GetAxisRaw(verticalAxis);
     Debug.Log($"Input: H={h}, V={v}");
+    Debug.Log("smashCount: " + smashCount + ", speed: " + ballSpeed);
 }
