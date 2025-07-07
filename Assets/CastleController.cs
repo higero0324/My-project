@@ -4,26 +4,47 @@ using System.Collections;
 
 public class CastleController : MonoBehaviour
 {
-    public int maxHP = 10;
-    private int currentHP;
+    [Header("右の城かどうか（True＝右）")]
+    public bool isRightCastle;
 
-    [Header("この城に対応するHPバー")]
+    [Header("HP表示用Slider")]
     public Slider hpSlider;
 
+    private Status status;
+
+    private float maxHP;
+    private float currentHP;
     private bool isInvincible = false;
 
     void Start()
     {
-        currentHP = maxHP;
-
-        if (hpSlider != null)
+        // Status取得
+        GameObject gameManager = GameObject.Find("GameManager");
+        if (gameManager != null)
         {
-            hpSlider.maxValue = maxHP;
-            hpSlider.value = currentHP;
+            status = gameManager.GetComponent<Status>();
+        }
+
+        if (status != null)
+        {
+            maxHP = isRightCastle ? status.HP2 : status.HP1;
+            currentHP = maxHP;
+
+            if (hpSlider != null)
+            {
+                hpSlider.maxValue = maxHP;
+                hpSlider.value = currentHP;
+            }
+
+            Debug.Log($"{gameObject.name} の 初期HP: {maxHP}");
+        }
+        else
+        {
+            Debug.LogError("Status スクリプトが見つかりません！");
         }
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(float damage)
     {
         if (isInvincible) return;
 
@@ -40,7 +61,7 @@ public class CastleController : MonoBehaviour
         if (currentHP <= 0)
         {
             Debug.Log($"{gameObject.name} が破壊された！");
-            // ゲームオーバー処理など
+            // ゲームオーバー処理を書く場所
         }
 
         StartCoroutine(InvincibleCooldown(0.3f));
@@ -53,3 +74,4 @@ public class CastleController : MonoBehaviour
         isInvincible = false;
     }
 }
+// 

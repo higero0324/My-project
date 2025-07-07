@@ -6,19 +6,23 @@ public class BallController : MonoBehaviour
     public float baseSpeed = 15f;
     public float currentSpeed; // 外部参照用（PlayerControllerなどから使う）
 
-    public int hitCount = 0; // 衝突回数をカウント
+    public float hitCount = 0; // 衝突回数をカウント
 
     public float smashWeight = 10f;
 
     public float smashCount = 0f;
 
-    public float hitWeight = 0.2f;
+    public float hitWeight = 0.1f;
     private Vector2 moveDirection;
     private Rigidbody2D rb;
 
     public float ballSpeed;
 
     public GameManager GameManager; // ゲームマネージャーの参照
+    public float Damage1;
+    public float Damage2;
+
+    public Status status; // ステータスの参照
 
 
     void Start()
@@ -29,7 +33,18 @@ public class BallController : MonoBehaviour
         rb.angularDamping = 0f;
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
-        int dir = Random.Range(0, 2) * 2 - 1;
+        GameObject gameManager = GameObject.Find("GameManager");
+        if (gameManager != null)
+        {
+            status = gameManager.GetComponent<Status>();
+        }
+
+        if (status == null)
+        {
+            Debug.LogError("Status が見つかりません！");
+        }
+
+        float dir = Random.Range(0, 2) * 2 - 1;
         moveDirection = new Vector2(dir, 0).normalized;
 
         currentSpeed = baseSpeed;
@@ -48,6 +63,7 @@ public class BallController : MonoBehaviour
             // 衝突回数に応じて速度を調整
             // 等速直線運動（速度補正）
         }
+
         else
         {
             currentSpeed = 25f; // 最大速度を超えないように制限
@@ -77,19 +93,42 @@ public class BallController : MonoBehaviour
             rb.linearVelocity = moveDirection * ballSpeed;
         }
 
-        if (collision.collider.CompareTag("CastleR") || collision.collider.CompareTag("CastleB"))
+        if (collision.collider.CompareTag("CastleR"))
         {
             CastleController castle = collision.collider.GetComponent<CastleController>();
             if (castle != null)
             {
-                castle.TakeDamage(1);
+                Damageto1();
+            }
+
+            void Damageto1()
+            {
+                Damage2 = (Mathf.Abs((status.ATK2 - status.DEF1) + (status.ATK2 - status.DEF1)) / 2f) + status.MAG2 * smashCount  + Mathf.Abs(hitCount / 10)+ 1f;
+                castle.TakeDamage(Damage2);
                 Debug.Log((collision.collider.CompareTag("CastleR") ? "左" : "右") + "の城にダメージ！");
             }
+
+            smashCount = 0; // スマッシュカウントリセット
+        }
+        if (collision.collider.CompareTag("CastleB"))
+        {
+            CastleController castle = collision.collider.GetComponent<CastleController>();
+            if (castle != null)
+            {
+                Damageto2();
+            }
+            void Damageto2()
+            {
+                Damage1 = (Mathf.Abs((status.ATK1 - status.DEF2) + (status.ATK1 - status.DEF2)) / 2f) + status.MAG1 * smashCount + Mathf.Abs(hitCount / 10) + 1f;
+                castle.TakeDamage(Damage1);
+                Debug.Log((collision.collider.CompareTag("CastleB") ? "右" : "左") + "の城にダメージ！");
+            }
+            
             smashCount = 0; // スマッシュカウントリセット
         }
         if (collision.collider.CompareTag("PlayerR"))
         {
-            GameManager.mp1 ++; // PlayerRのMPを増加
+            GameManager.mp1++; // PlayerRのMPを増加
         }
         if (collision.collider.CompareTag("PlayerB"))
         {

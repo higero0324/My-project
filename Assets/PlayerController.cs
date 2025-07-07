@@ -3,6 +3,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     public BallController ball;
+
     public float baseSpeed = 10f;
     public float addSpeed = 0.7f;
 
@@ -16,7 +17,7 @@ public class PlayerController : MonoBehaviour
 
     private Vector3 moveInput;
 
-    void FixedUpdate()
+    void Update()
     {
         float moveX = Input.GetAxisRaw(horizontalAxis);
         float moveY = Input.GetAxisRaw(verticalAxis);
