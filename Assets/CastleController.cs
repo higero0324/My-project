@@ -18,6 +18,16 @@ public class CastleController : MonoBehaviour
 
     void Start()
     {
+        float screenHalfWidth = Camera.main.orthographicSize * Camera.main.aspect;
+        float offset = 0f; // 画面端から0ユニットの距離
+        Vector3 pos = transform.position;
+
+        if (isRightCastle)
+            pos.x = screenHalfWidth - offset;
+        else
+            pos.x = -screenHalfWidth + offset;
+
+        transform.position = pos;
         // Status取得
         GameObject gameManager = GameObject.Find("GameManager");
         if (gameManager != null)
