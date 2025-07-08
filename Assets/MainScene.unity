@@ -1424,6 +1424,37 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &930324338
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 930324339}
+  m_Layer: 0
+  m_Name: skill
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &930324339
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 930324338}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.42069, y: 0.11338, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &942849245
 GameObject:
   m_ObjectHideFlags: 0
@@ -2870,6 +2901,8 @@ MonoBehaviour:
   mc1: 0
   mp2: 0
   mc2: 0
+  isRunning1: 0
+  isRunning2: 0
 --- !u!114 &2038679448
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2884,16 +2917,37 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameManager: {fileID: 2038679447}
   ball: {fileID: 1927723049}
+  HP1: 0
   ATK1: 0
   DEF1: 0
-  HP1: 0
   MAG1: 0
+  skillCool1: 0
+  HP2: 0
   ATK2: 0
   DEF2: 0
-  HP2: 0
   MAG2: 0
-  Damage1: 0
-  Damage2: 0
+  skillCool2: 0
+  statusList: []
+  select1: 0
+  select2: 2
+  selected1:
+    name: 
+    HP: 0
+    ATK: 0
+    DEF: 0
+    MAG: 0
+    SkillCool: 0
+    skill: {fileID: 0}
+    RainBress: {fileID: 0}
+  selected2:
+    name: 
+    HP: 0
+    ATK: 0
+    DEF: 0
+    MAG: 0
+    SkillCool: 0
+    skill: {fileID: 0}
+    RainBress: {fileID: 0}
 --- !u!1 &2068038208
 GameObject:
   m_ObjectHideFlags: 0
@@ -3195,3 +3249,4 @@ SceneRoots:
   - {fileID: 743426654}
   - {fileID: 1428621690}
   - {fileID: 557074146}
+  - {fileID: 930324339}

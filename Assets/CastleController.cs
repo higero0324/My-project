@@ -19,7 +19,7 @@ public class CastleController : MonoBehaviour
     void Start()
     {
         float screenHalfWidth = Camera.main.orthographicSize * Camera.main.aspect;
-        float offset = 0f; // 画面端から0ユニットの距離
+        float offset = 0f;
         Vector3 pos = transform.position;
 
         if (isRightCastle)
@@ -28,7 +28,7 @@ public class CastleController : MonoBehaviour
             pos.x = -screenHalfWidth + offset;
 
         transform.position = pos;
-        // Status取得
+
         GameObject gameManager = GameObject.Find("GameManager");
         if (gameManager != null)
         {
@@ -71,7 +71,7 @@ public class CastleController : MonoBehaviour
         if (currentHP <= 0)
         {
             Debug.Log($"{gameObject.name} が破壊された！");
-            // ゲームオーバー処理を書く場所
+            // ゲームオーバー処理を呼ぶ等はここに
         }
 
         StartCoroutine(InvincibleCooldown(0.3f));
@@ -83,5 +83,17 @@ public class CastleController : MonoBehaviour
         yield return new WaitForSeconds(duration);
         isInvincible = false;
     }
+
+    public void Heal(float amount)
+    {
+        currentHP += amount;
+        currentHP = Mathf.Min(currentHP, maxHP);
+
+        if (hpSlider != null)
+        {
+            hpSlider.value = currentHP;
+        }
+
+        Debug.Log($"{gameObject.name} が {amount} 回復！ 現在HP: {currentHP}");
+    }
 }
-// 

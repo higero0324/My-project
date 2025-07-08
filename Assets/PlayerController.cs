@@ -4,8 +4,6 @@ public class PlayerController : MonoBehaviour
 {
     public BallController ball;
 
-    public float baseSpeed = 10f;
-    public float addSpeed = 0.7f;
 
     public string horizontalAxis = "Horizontal";
     public string verticalAxis = "Vertical";
@@ -16,6 +14,15 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed;
 
     private Vector3 moveInput;
+
+    public float baseSpeed;
+    public float addSpeed; 
+
+    void Start()
+    {
+        baseSpeed = 10f;
+        addSpeed = 0;
+    }
 
     void Update()
     {

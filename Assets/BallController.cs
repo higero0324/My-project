@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class BallController : MonoBehaviour
@@ -23,6 +24,14 @@ public class BallController : MonoBehaviour
     public float Damage2;
 
     public Status status; // ステータスの参照
+
+    private bool canAddHitCount = true;
+    private bool canAddMP1 = true;
+    private bool canAddMP2 = true;
+
+    float hitCool;
+    float maxSpeed; // 最大速度
+
 
 
     void Start()
@@ -51,11 +60,14 @@ public class BallController : MonoBehaviour
         ballSpeed = currentSpeed; // ✅ ここで初期化
         rb.linearVelocity = moveDirection * currentSpeed;
         smashWeight = 10f;
+        hitCool = 0.5f;
+        hitCount = 0;
+        maxSpeed = 20f; // 最大速度
     }
 
     void FixedUpdate()
     {
-        if (currentSpeed + hitWeight <= 25f) // 最大速度制限
+        if (currentSpeed + hitWeight <= maxSpeed) // 最大速度制限
         {
             currentSpeed = baseSpeed + hitCount * hitWeight;
             ballSpeed = currentSpeed + smashCount * smashWeight; // 衝突回数に応じて速度を調整
@@ -66,7 +78,7 @@ public class BallController : MonoBehaviour
 
         else
         {
-            currentSpeed = 25f; // 最大速度を超えないように制限
+            currentSpeed = maxSpeed; // 最大速度を超えないように制限
             ballSpeed = currentSpeed + smashCount * smashWeight; // 最大速度に応じて調整
         }
 
@@ -79,12 +91,16 @@ public class BallController : MonoBehaviour
 
         if (collision.contacts.Length > 0 && (collision.collider.CompareTag("PlayerR") || collision.collider.CompareTag("PlayerB")))
         {
-
             Vector2 toPlayer = ((Vector2)collision.collider.transform.position - rb.position).normalized;
             moveDirection = (-toPlayer).normalized;
             rb.linearVelocity = moveDirection * ballSpeed;
-            smashCount = 0; // スマッシュカウントリセット
-            hitCount++;
+            smashCount = 0;
+
+            if (canAddHitCount)
+            {
+                hitCount++;
+                StartCoroutine(HitCountCooldown(hitCool));
+            }
         }
         else if (collision.contacts.Length > 0)
         {
@@ -103,13 +119,15 @@ public class BallController : MonoBehaviour
 
             void Damageto1()
             {
-                Damage2 = (Mathf.Abs((status.ATK2 - status.DEF1) + (status.ATK2 - status.DEF1)) / 2f) + status.MAG2 * smashCount  + Mathf.Abs(hitCount / 10)+ 1f;
+                Damage2 = (Mathf.Abs((status.ATK2 - status.DEF1) + (status.ATK2 - status.DEF1)) / 2f)
+                        + status.MAG2 * smashCount + Mathf.Abs(hitCount / 10) + 1f;
                 castle.TakeDamage(Damage2);
                 Debug.Log((collision.collider.CompareTag("CastleR") ? "左" : "右") + "の城にダメージ！");
             }
 
-            smashCount = 0; // スマッシュカウントリセット
+            smashCount = 0;
         }
+
         if (collision.collider.CompareTag("CastleB"))
         {
             CastleController castle = collision.collider.GetComponent<CastleController>();
@@ -117,22 +135,50 @@ public class BallController : MonoBehaviour
             {
                 Damageto2();
             }
+
             void Damageto2()
             {
-                Damage1 = (Mathf.Abs((status.ATK1 - status.DEF2) + (status.ATK1 - status.DEF2)) / 2f) + status.MAG1 * smashCount + Mathf.Abs(hitCount / 10) + 1f;
+                Damage1 = (Mathf.Abs((status.ATK1 - status.DEF2) + (status.ATK1 - status.DEF2)) / 2f)
+                        + status.MAG1 * smashCount + Mathf.Abs(hitCount / 10) + 1f;
                 castle.TakeDamage(Damage1);
                 Debug.Log((collision.collider.CompareTag("CastleB") ? "右" : "左") + "の城にダメージ！");
             }
-            
-            smashCount = 0; // スマッシュカウントリセット
+
+            smashCount = 0;
         }
-        if (collision.collider.CompareTag("PlayerR"))
+
+        if (collision.collider.CompareTag("PlayerR") && canAddMP1)
         {
-            GameManager.mp1++; // PlayerRのMPを増加
+            GameManager.mp1++;
+            StartCoroutine(MPCooldown(1));
         }
-        if (collision.collider.CompareTag("PlayerB"))
+
+        if (collision.collider.CompareTag("PlayerB") && canAddMP2)
         {
-            GameManager.mp2 ++; // PlayerBのMPを増加
+            GameManager.mp2++;
+            StartCoroutine(MPCooldown(2));
+        }
+    }
+    private IEnumerator HitCountCooldown(float duration)
+    {
+        canAddHitCount = false;
+        yield return new WaitForSeconds(duration);
+        canAddHitCount = true;
+    }
+
+    private IEnumerator MPCooldown(int player)
+    {
+        if (player == 1)
+        {
+            canAddMP1 = false;
+            yield return new WaitForSeconds(hitCool);
+            canAddMP1 = true;
+        }
+        else if (player == 2)
+        {
+            canAddMP2 = false;
+            yield return new WaitForSeconds(hitCool);
+            canAddMP2 = true;
         }
     }
 

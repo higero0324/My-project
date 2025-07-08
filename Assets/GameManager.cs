@@ -1,12 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
     public TextMeshProUGUI timerText;
     private float elapsedTime = 0f;
-    private bool isGameOver = false; // ✅ これだけ残す
+    private bool isGameOver = false;
 
     public GameObject gameOverPanel;
     public Text gameOverText;
@@ -17,12 +18,22 @@ public class GameManager : MonoBehaviour
     public float mc1;
     public float mp2;
     public float mc2;
+    public Status status;
+    public bool isRunning1 = false;
+    public bool isRunning2 = false;
 
     void Start()
     {
         ball.smashCount = 0;
         mp1 = mp2 = mc1 = mc2 = 0;
+
+        status = FindFirstObjectByType<Status>();
+        if (status == null)
+        {
+            Debug.LogError("Status スクリプトが見つかりません！");
+        }
     }
+
     void Update()
     {
         if (isGameOver) return;
@@ -31,12 +42,11 @@ public class GameManager : MonoBehaviour
 
         if (timerText != null)
         {
-                // 時間を「分:秒.1桁ミリ秒」で表示（例：1:23.4）
             int minutes = Mathf.FloorToInt(elapsedTime / 60f);
             float seconds = elapsedTime % 60f;
             timerText.text = $"{minutes}:{seconds:00.0}";
         }
-        
+
         mc1 = Mathf.Floor(mp1 / 10);
         mc2 = Mathf.Floor(mp2 / 10);
 
@@ -45,7 +55,7 @@ public class GameManager : MonoBehaviour
             if (mc1 > 0)
             {
                 mp1 -= 10;
-                ball.smashCount = 1; // スマッシュを発動
+                ball.smashCount = 1;
             }
         }
         if (Input.GetKeyDown(KeyCode.U))
@@ -53,10 +63,63 @@ public class GameManager : MonoBehaviour
             if (mc2 > 0)
             {
                 mp2 -= 10;
-                ball.smashCount = 1; // スマッシュを発動
+                ball.smashCount = 1;
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            if (isRunning1 == false)
+            {
+                StartCoroutine(skill1());
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            if (isRunning2 == false)
+            {
+                StartCoroutine(skill2());
             }
         }
     }
+
+    public IEnumerator skill1()
+    {
+        GameObject castleR = GameObject.FindWithTag("CastleR");
+        if (castleR != null)
+        {
+            isRunning1 = true;
+
+            status.selected1.skill?.Activate(castleR, this);
+
+            yield return new WaitForSeconds(status.skillCool1); // クールタイム
+            isRunning1 = false;
+        }
+        else
+        {
+            Debug.LogError("CastleR が見つかりません");
+        }
+    }
+
+    public IEnumerator skill2()
+    {
+        GameObject castleB = GameObject.FindWithTag("CastleB");
+        if (castleB != null)
+        {
+            isRunning2 = true;
+
+            status.selected2.skill?.Activate(castleB, this);
+
+            yield return new WaitForSeconds(status.skillCool2); // クールタイム
+            isRunning2 = false;
+        }
+        else
+        {
+            Debug.LogError("CastleB が見つかりません");
+        }
+    }
+
     public void GameOver(string winner)
     {
         if (isGameOver) return;
@@ -65,10 +128,8 @@ public class GameManager : MonoBehaviour
         gameOverPanel.SetActive(true);
         gameOverText.text = winner + " の勝ち！";
 
-        // 必要なら、ボールやプレイヤーの操作停止処理もここに入れる
-        Time.timeScale = 0f; // ゲームを停止
+        Time.timeScale = 0f;
         Debug.Log($"ゲーム終了！経過時間：{elapsedTime:F1} 秒");
     }
-
-
 }
+
